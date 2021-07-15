@@ -1,0 +1,29 @@
+name: Build TypeScript and Docker
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          always-auth: true
+          registry-url: https://npm.pkg.github.com
+          node-version: 14
+          scope: '@bortexel'
+      - name: Install dependencies
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Compile TypeScript
+        run: tsc
+      - name: Build, tag, and push Docker image to registry
+        run: |
+          docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }} registry.ruscalworld.ru
+          docker build -t registry.ruscalworld.ru/bortexel/activity-watcher:latest .
+          docker push registry.ruscalworld.ru/bortexel/activity-watcher:latest
