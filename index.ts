@@ -3,6 +3,13 @@ import BortexelAPI from "./src/BortexelAPI.js";
 import ActivityWatcher from "./src/ActivityWatcher.js";
 
 async function start() {
+    let token = process.env.BORTEXEL_TOKEN
+    let url = process.env.BORTEXEL_URL
+    if (typeof token === 'undefined' || typeof url === 'undefined') {
+        console.error('BORTEXEL_TOKEN or BORTEXEL_URL is not set')
+        return
+    }
+
     let leaderboard = new Leaderboard("https://api.bortexel.ru/method/leaderboard/get.php")
     let playersActivity = await leaderboard.fetchPlayersActivity()
 
@@ -11,7 +18,12 @@ async function start() {
     let recentlyPlayed = await watcher.getRecentlyPlayed()
     await watcher.save()
 
-    let api = new BortexelAPI("https://api.bortexel.ru/v3", "") // TODO: Implement config
+    let api = new BortexelAPI({
+        token, url,
+    }, {
+        requiredHours: 3,
+        activeDays: 3,
+    })
     await api.fetchAllUsers()
     await api.reportInactive()
     await api.reportActive(recentlyPlayed)

@@ -4,13 +4,18 @@ import User from "@bortexel/bortexeljs/models/users/user.js";
 export default class BortexelAPI {
     private readonly users: User[]
     private readonly client: Bortexel
+    private readonly requiredHours: number
+    private readonly activeDays: number
 
-    constructor(apiUrl: string, apiToken: string) {
+    constructor(apiConfig: { url: string, token: string }, activityConfig: { requiredHours: number, activeDays: number }) {
         // @ts-ignore
         this.client = new Bortexel.default({
-            token: apiToken,
-            url: apiUrl
+            token: apiConfig.token,
+            url: apiConfig.url
         })
+
+        this.requiredHours = activityConfig.requiredHours
+        this.activeDays = activityConfig.activeDays
 
         this.users = []
     }
@@ -55,22 +60,6 @@ export default class BortexelAPI {
         return inactiveUsers
     }
 
-    async findActive(recentlyPlayed: { [key: string]: number }) {
-        console.log("Searching for active users")
-        let activeUsers = []
-        let users = this.getUsersMap()
-
-        for (let username in recentlyPlayed) {
-            if (!recentlyPlayed.hasOwnProperty(username)) continue
-            if (!users.hasOwnProperty(username)) continue
-            if (recentlyPlayed[username] < 3 * 3600) continue // TODO: Implement config
-            activeUsers.push(users[username])
-        }
-
-        console.log(`Found ${ activeUsers.length } active users`)
-        return activeUsers
-    }
-
     async reportInactive() {
         console.log("Sending info about inactive users to API")
         let start = new Date().getTime()
@@ -84,6 +73,22 @@ export default class BortexelAPI {
         }
 
         console.log(`Successfully reported info about ${ inactiveUsers.length } inactive users in ${ new Date().getTime() - start }ms`)
+    }
+
+    async findActive(recentlyPlayed: { [key: string]: number }) {
+        console.log("Searching for active users")
+        let activeUsers = []
+        let users = this.getUsersMap()
+
+        for (let username in recentlyPlayed) {
+            if (!recentlyPlayed.hasOwnProperty(username)) continue
+            if (!users.hasOwnProperty(username)) continue
+            if (recentlyPlayed[username] < this.requiredHours * 3600) continue
+            activeUsers.push(users[username])
+        }
+
+        console.log(`Found ${ activeUsers.length } active users`)
+        return activeUsers
     }
 
     async reportActive(recentlyPlayed: { [key: string]: number }) {
@@ -116,6 +121,6 @@ export default class BortexelAPI {
     }
 
     getActiveTill() {
-        return new Date(new Date().getTime() + 3 * 24 * 3600 * 1000) // TODO: Implement config
+        return new Date(new Date().getTime() + this.activeDays * 24 * 3600 * 1000)
     }
 }
