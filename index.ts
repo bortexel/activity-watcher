@@ -13,8 +13,8 @@ async function start() {
 
     let api = new BortexelAPI("https://api.bortexel.ru/v3", "") // TODO: Implement config
     await api.fetchAllUsers()
-    await api.reportInactive().then()
-    await api.reportActive(recentlyPlayed).then()
+    await api.reportInactive()
+    await api.reportActive(recentlyPlayed)
 }
 
 start().then(() => {})

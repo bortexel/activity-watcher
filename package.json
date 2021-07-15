@@ -15,7 +15,7 @@
   "author": "RuscalWorld",
   "license": "MIT",
   "dependencies": {
-    "@bortexel/bortexeljs": "^1.0.33",
+    "@bortexel/bortexeljs": "^1.0.34",
     "unfetch": "^4.2.0"
   },
   "devDependencies": {

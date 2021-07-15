@@ -34,7 +34,7 @@ export default class BortexelAPI {
             totalPages = response.getResponseMeta().pagination.totalPages
         }
 
-        console.log(`Successfully fetched ${this.users.length} users in ${new Date().getTime() - start}ms`)
+        console.log(`Successfully fetched ${ this.users.length } users in ${ new Date().getTime() - start }ms`)
     }
 
     async findInactive() {
@@ -51,8 +51,24 @@ export default class BortexelAPI {
             if (activeTill < this.now()) inactiveUsers.push(user)
         }
 
-        console.log(`Found ${inactiveUsers.length} inactive users`)
+        console.log(`Found ${ inactiveUsers.length } inactive users`)
         return inactiveUsers
+    }
+
+    async findActive(recentlyPlayed: { [key: string]: number }) {
+        console.log("Searching for active users")
+        let activeUsers = []
+        let users = this.getUsersMap()
+
+        for (let username in recentlyPlayed) {
+            if (!recentlyPlayed.hasOwnProperty(username)) continue
+            if (!users.hasOwnProperty(username)) continue
+            if (recentlyPlayed[username] < 3 * 3600) continue // TODO: Implement config
+            activeUsers.push(users[username])
+        }
+
+        console.log(`Found ${ activeUsers.length } active users`)
+        return activeUsers
     }
 
     async reportInactive() {
@@ -67,14 +83,26 @@ export default class BortexelAPI {
             await new User.default(user).reportInactivity(this.client)
         }
 
-        console.log(`Successfully reported info about ${inactiveUsers.length} inactive users in ${new Date().getTime() - start}ms`)
+        console.log(`Successfully reported info about ${ inactiveUsers.length } inactive users in ${ new Date().getTime() - start }ms`)
     }
 
     async reportActive(recentlyPlayed: { [key: string]: number }) {
         console.log("Sending info about active users to API")
         let start = new Date().getTime()
-        let activeUserCount = 0
+        let activeUsers = await this.findActive(recentlyPlayed)
 
+        for (let i in activeUsers) {
+            if (!activeUsers.hasOwnProperty(i)) continue
+            let user = activeUsers[i]
+            // @ts-ignore
+            let response = await new User.default(user).reportActivity(this.client, this.getActiveTill())
+            console.log(response.getErrors());
+        }
+
+        console.log(`Successfully reported info about ${ activeUsers.length } active users in ${ new Date().getTime() - start }ms`)
+    }
+
+    getUsersMap() {
         let users: { [key: string]: User } = {}
 
         for (let i in this.users) {
@@ -84,16 +112,7 @@ export default class BortexelAPI {
             users[user.username] = user
         }
 
-        for (let username in recentlyPlayed) {
-            if (!recentlyPlayed.hasOwnProperty(username)) continue
-            if (!users.hasOwnProperty(username)) continue
-            if (recentlyPlayed[username] < 3 * 3600) continue // TODO: Implement config
-            activeUserCount++
-            // @ts-ignore
-            await new User.default(users[username]).reportActivity(this.client, this.getActiveTill())
-        }
-
-        console.log(`Successfully reported info about ${activeUserCount} active users in ${new Date().getTime() - start}ms`)
+        return users
     }
 
     getActiveTill() {
