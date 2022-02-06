@@ -1,5 +1,5 @@
-import { default as Bortexel } from "@bortexel/bortexeljs/bortexel.js";
-import User from "@bortexel/bortexeljs/models/users/user.js";
+import { default as Bortexel } from 'bortexel-js/bortexel.js'
+import User from 'bortexel-js/models/users/user.js'
 
 export default class BortexelAPI {
     private readonly users: User[]
@@ -11,7 +11,7 @@ export default class BortexelAPI {
         // @ts-ignore
         this.client = new Bortexel.default({
             token: apiConfig.token,
-            url: apiConfig.url
+            url: apiConfig.url,
         })
 
         this.requiredHours = activityConfig.requiredHours
@@ -26,7 +26,7 @@ export default class BortexelAPI {
 
     async fetchAllUsers() {
         if (this.users.length > 0) return this.users
-        console.log("Fetching list of all users from API")
+        console.log('Fetching list of all users from API')
         let start = new Date().getTime()
 
         let currentPage = 1
@@ -43,7 +43,7 @@ export default class BortexelAPI {
     }
 
     async findInactive() {
-        console.log("Searching for inactive users")
+        console.log('Searching for inactive users')
         let inactiveUsers = []
 
         for (let i in this.users) {
@@ -61,7 +61,7 @@ export default class BortexelAPI {
     }
 
     async reportInactive() {
-        console.log("Sending info about inactive users to API")
+        console.log('Sending info about inactive users to API')
         let start = new Date().getTime()
         let inactiveUsers = await this.findInactive()
 
@@ -76,7 +76,7 @@ export default class BortexelAPI {
     }
 
     async findActive(recentlyPlayed: { [key: string]: number }) {
-        console.log("Searching for active users")
+        console.log('Searching for active users')
         let activeUsers = []
         let users = this.getUsersMap()
 
@@ -92,7 +92,7 @@ export default class BortexelAPI {
     }
 
     async reportActive(recentlyPlayed: { [key: string]: number }) {
-        console.log("Sending info about active users to API")
+        console.log('Sending info about active users to API')
         let start = new Date().getTime()
         let activeUsers = await this.findActive(recentlyPlayed)
 
@@ -101,7 +101,7 @@ export default class BortexelAPI {
             let user = activeUsers[i]
             // @ts-ignore
             let response = await new User.default(user).reportActivity(this.client, this.getActiveTill())
-            console.log(response.getErrors());
+            console.log(response.getErrors())
         }
 
         console.log(`Successfully reported info about ${ activeUsers.length } active users in ${ new Date().getTime() - start }ms`)

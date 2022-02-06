@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from 'fs'
 
 export default class ActivityWatcher {
     private readonly players: { [key: string]: number }
@@ -62,6 +62,6 @@ export default class ActivityWatcher {
     }
 
     getStoragePath(): string {
-        return "storage/storage.json"
+        return 'storage/storage.json'
     }
 }

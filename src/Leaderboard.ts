@@ -1,4 +1,4 @@
-import unfetch from "isomorphic-unfetch";
+import unfetch from 'isomorphic-unfetch'
 
 export default class Leaderboard {
     private readonly url: string
@@ -8,7 +8,7 @@ export default class Leaderboard {
     }
 
     async fetchPlayersActivity() {
-        console.log("Fetching activity of players from leaderboard")
+        console.log('Fetching activity of players from leaderboard')
         let start = new Date().getTime()
 
         let response = await unfetch(this.url)

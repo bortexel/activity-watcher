@@ -1,6 +1,6 @@
-import Leaderboard from "./src/Leaderboard.js";
-import BortexelAPI from "./src/BortexelAPI.js";
-import ActivityWatcher from "./src/ActivityWatcher.js";
+import Leaderboard from './src/Leaderboard.js'
+import BortexelAPI from './src/BortexelAPI.js'
+import ActivityWatcher from './src/ActivityWatcher.js'
 
 async function start() {
     let token = process.env.BORTEXEL_TOKEN
@@ -10,7 +10,7 @@ async function start() {
         return
     }
 
-    let leaderboard = new Leaderboard("https://api.bortexel.ru/method/leaderboard/get.php")
+    let leaderboard = new Leaderboard('https://api.bortexel.ru/method/leaderboard/get.php')
     let playersActivity = await leaderboard.fetchPlayersActivity()
 
     let watcher = new ActivityWatcher(playersActivity)
