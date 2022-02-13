@@ -15,7 +15,7 @@ async function start() {
 
     let watcher = new ActivityWatcher(playersActivity)
     await watcher.load()
-    let recentlyPlayed = await watcher.getRecentlyPlayed()
+    let recentlyPlayed = watcher.getRecentlyPlayed()
     await watcher.save()
 
     let api = new BortexelAPI({
