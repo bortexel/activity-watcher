@@ -31,6 +31,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
+          tags: type=sha
           images: ghcr.io/bortexel/activity-watcher
 
       - name: Build and push Docker image
