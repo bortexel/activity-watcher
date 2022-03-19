@@ -10,7 +10,7 @@ async function start() {
         return
     }
 
-    let leaderboard = new Leaderboard('https://api.bortexel.ru/method/leaderboard/get.php?extended=true')
+    let leaderboard = new Leaderboard('https://api.bortexel.net/method/leaderboard/get.php?extended=true')
     let playersActivity = await leaderboard.fetchPlayersActivity()
 
     let watcher = new ActivityWatcher(playersActivity)
