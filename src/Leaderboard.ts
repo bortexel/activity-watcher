@@ -62,8 +62,7 @@ export default class Leaderboard {
 
         // @ts-ignore
         for (const player of data) {
-            // TODO: consider using UUIDs
-            players[player.name] = player.stats['bortexel:totals']['bortexel:play_time']
+            players[player.uuid] = player.stats['bortexel:totals']['bortexel:play_time']
         }
 
         console.log(`Successfully fetched activity for ${ Object.keys(players).length } players in ${ new Date().getTime() - start }ms`)
