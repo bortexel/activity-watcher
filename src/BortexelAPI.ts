@@ -1,5 +1,6 @@
 import { default as Bortexel } from 'bortexel-js/bortexel.js'
 import User from 'bortexel-js/models/users/user.js'
+import APIError from 'bortexel-js/requests/APIError'
 
 export default class BortexelAPI {
     private readonly users: User[]
@@ -62,14 +63,14 @@ export default class BortexelAPI {
 
     async reportInactive() {
         console.log('Sending info about inactive users to API')
-        let start = new Date().getTime()
-        let inactiveUsers = await this.findInactive()
+        const start = new Date().getTime()
+        const inactiveUsers = await this.findInactive()
 
-        for (let i in inactiveUsers) {
-            if (!inactiveUsers.hasOwnProperty(i)) continue
-            let user = inactiveUsers[i]
+        for (const user of inactiveUsers) {
             // @ts-ignore
-            await new User.default(user).reportInactivity(this.client)
+            const response = await new User.default(user).reportInactivity(this.client)
+            if (response.getErrors().length > 0) response.getErrors()
+                .map((error: APIError) => error.message).forEach(console.error)
         }
 
         console.log(`Successfully reported info about ${ inactiveUsers.length } inactive users in ${ new Date().getTime() - start }ms`)
@@ -77,14 +78,12 @@ export default class BortexelAPI {
 
     async findActive(recentlyPlayed: { [key: string]: number }) {
         console.log('Searching for active users')
-        let activeUsers = []
-        let users = this.getUsersMap()
+        const activeUsers = []
+        const users = this.getUsersMap()
 
-        for (let username in recentlyPlayed) {
-            if (!recentlyPlayed.hasOwnProperty(username)) continue
-            if (!users.hasOwnProperty(username)) continue
-            if (recentlyPlayed[username] < this.requiredHours * 3600) continue
-            activeUsers.push(users[username])
+        for (const playerID in recentlyPlayed) {
+            if (recentlyPlayed[playerID] < this.requiredHours * 3600) continue
+            activeUsers.push(users[playerID])
         }
 
         console.log(`Found ${ activeUsers.length } active users`)
@@ -93,28 +92,26 @@ export default class BortexelAPI {
 
     async reportActive(recentlyPlayed: { [key: string]: number }) {
         console.log('Sending info about active users to API')
-        let start = new Date().getTime()
-        let activeUsers = await this.findActive(recentlyPlayed)
+        const start = new Date().getTime()
+        const activeUsers = await this.findActive(recentlyPlayed)
 
-        for (let i in activeUsers) {
-            if (!activeUsers.hasOwnProperty(i)) continue
-            let user = activeUsers[i]
+        for (const user of activeUsers) {
             // @ts-ignore
-            let response = await new User.default(user).reportActivity(this.client, this.getActiveTill())
-            console.log(response.getErrors())
+            const response = await new User.default(user).reportActivity(this.client, this.getActiveTill())
+            if (response.getErrors().length > 0) response.getErrors()
+                .map((error: APIError) => error.message).forEach(console.error)
         }
 
         console.log(`Successfully reported info about ${ activeUsers.length } active users in ${ new Date().getTime() - start }ms`)
     }
 
     getUsersMap() {
-        let users: { [key: string]: User } = {}
+        const users: { [key: string]: User } = {}
 
-        for (let i in this.users) {
-            if (!this.users.hasOwnProperty(i)) continue
+        for (const i in this.users) {
             // @ts-ignore
-            let user = new User.default(this.users[i])
-            users[user.username] = user
+            const user = new User.default(this.users[i])
+            users[user.uuid] = user
         }
 
         return users
